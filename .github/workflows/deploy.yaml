@@ -1,7 +1,11 @@
 name: Deploy Serverless Functions Only
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'functions/**'
 
 permissions:
   id-token: write
