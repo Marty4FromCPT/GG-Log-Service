@@ -16,7 +16,7 @@ resource "aws_dynamodb_table" "log_table" {
 
   server_side_encryption {
     enabled     = true
-    kms_master_key_id = "alias/aws/dynamodb"
+    
   }
 
   tags = {
