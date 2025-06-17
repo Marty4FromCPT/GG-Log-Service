@@ -1,0 +1,31 @@
+Engineering Task:
+
+Developing a Simple Log Service
+
+Objective:
+Develop a simple log service application using serverless functions.
+
+Requirements:
+1. The solution should be entirely IAC driven.
+2. Create two serverless functions using AWS Lambda or Azure Functions:
+* Function 1: Receives a log entry and saves it.
+* Function 2: Retrieves the 100 most recent log entries.
+3. Log Entry Format:
+Each log entry should contain the following fields:
+* ID: Unique identifier for the log entry.
+* Date Time: Timestamp for when the log was created.
+* Severity: One of info, warning, or error.
+* Message: The actual log message.
+4. Functionality:
+* Function 1 should expose an API endpoint to receive log entries and store them.
+* Function 2 should expose an API that returns the last 100 log entries in JSON format, sorted by most recent.
+5. General Requirements:
+* Write the solution in a language of your choice.
+* Ensure the code is well-documented, follows best practices, and is easy to understand.
+* Push the solution to a GitHub repository and create a pipeline, with clear instructions on how to deploy and run the functions.
+* Ensure you follow least privilege principles.
+* Utilize encryption to secure your data.
+* Make sure your credentials are secured.
+* Ensure the pipeline authenticates securely to AWS or Azure using best practices.
+* Add security checks to your pipeline.
+* Consider security of your API
