@@ -4,11 +4,6 @@
 
 
 
-
-
-
-
-
 Project Folder Structure
 
 GG-LOG-SERVICE/
@@ -38,22 +33,3 @@ GG-LOG-SERVICE/
 
 
 
-
-
-Step 1
-
-Run the the following commands.
-cd terraform
-terraform init
-Confirm Terraform initializes successfully!!
-
-Step 2
-
-Run the following commands.
-terraform plan
-terraform apply
-
-Results
-Sets up and pushed a clean repo (GG-LOG-SERVICE)
-Applied Terraform and deployed AWS infrastructure (Lambda, DynamoDB, API Gateway)
-Verified that your GitHub repo matches your local setup

@@ -45,7 +45,7 @@ resource "aws_api_gateway_integration" "get_logs_integration" {
   uri                     = aws_lambda_function.get_logs.invoke_arn
 }
 
-# === Deployment ===
+# === Deployment (no stage_name here) ===
 resource "aws_api_gateway_deployment" "log_api" {
   rest_api_id = aws_api_gateway_rest_api.log_api.id
 
@@ -55,20 +55,27 @@ resource "aws_api_gateway_deployment" "log_api" {
   ]
 }
 
+# === Stage ===
+resource "aws_api_gateway_stage" "log_stage" {
+  rest_api_id   = aws_api_gateway_rest_api.log_api.id
+  deployment_id = aws_api_gateway_deployment.log_api.id
+  stage_name    = "prod"
+}
+
 # === API Key ===
 resource "aws_api_gateway_api_key" "log_api_key" {
   name    = "LogServiceAPIKey"
   enabled = true
-  value   = "log-service-key-123" # You can let AWS generate it by omitting 'value'
+  value   = "log-service-key-123"
 }
 
-# === Usage Plan (fixed syntax) ===
+# === Usage Plan ===
 resource "aws_api_gateway_usage_plan" "log_plan" {
   name = "LogServiceUsagePlan"
 
   api_stages {
     api_id = aws_api_gateway_rest_api.log_api.id
-    stage  = aws_api_gateway_deployment.log_api.stage_name
+    stage  = aws_api_gateway_stage.log_stage.stage_name
   }
 
   throttle_settings {
@@ -88,10 +95,10 @@ resource "aws_api_gateway_usage_plan_key" "log_plan_key" {
   usage_plan_id = aws_api_gateway_usage_plan.log_plan.id
 }
 
-# === Method Settings for CloudWatch Logging ===
+# === Method Settings for Logging ===
 resource "aws_api_gateway_method_settings" "log_method_settings" {
   rest_api_id = aws_api_gateway_rest_api.log_api.id
-  stage_name  = aws_api_gateway_deployment.log_api.stage_name
+  stage_name  = aws_api_gateway_stage.log_stage.stage_name
   method_path = "*/*"
 
   settings {
@@ -99,10 +106,4 @@ resource "aws_api_gateway_method_settings" "log_method_settings" {
     logging_level       = "INFO"
     data_trace_enabled  = false
   }
-}
-
-resource "aws_api_gateway_stage" "log_stage" {
-  rest_api_id   = aws_api_gateway_rest_api.log_api.id
-  deployment_id = aws_api_gateway_deployment.log_api.id
-  stage_name    = "prod"
 }
