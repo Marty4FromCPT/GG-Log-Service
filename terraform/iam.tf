@@ -94,3 +94,29 @@ resource "aws_iam_role_policy" "dynamodb_access" {
     ]
   })
 }
+data "aws_kms_key" "log_table_key" {
+  key_id = "e4fac112-7583-4de8-9420-fd2968badacb"
+}
+
+resource "aws_iam_policy" "lambda_kms_policy" {
+  name = "lambda-kms-decrypt"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "kms:Decrypt",
+          "kms:GenerateDataKey"
+        ]
+        Resource = data.aws_kms_key.log_table_key.arn
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_kms_attach" {
+  role       = aws_iam_role.lambda_exec_role.name
+  policy_arn = aws_iam_policy.lambda_kms_policy.arn
+}
