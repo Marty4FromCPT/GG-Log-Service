@@ -1,0 +1,46 @@
+name: Secure Terraform Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  deploy:
+    name: Terraform Secure CI/CD
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    defaults:
+      run:
+        working-directory: terraform
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+
+      - name: Terraform Format
+        run: terraform fmt -check
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Security Scan (tfsec)
+        uses: aquasecurity/tfsec-action@v1.0.3
+
+      - name: Python Security Scan (bandit)
+        uses: tj-actions/bandit@v2
+        with:
+          path: ../functions/
+          options: "-r -lll"
