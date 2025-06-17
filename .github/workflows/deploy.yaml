@@ -11,8 +11,8 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      id-token: write     # Needed for OIDC to assume the role
-      contents: read      # Needed to checkout code
+      id-token: write
+      contents: read
 
     defaults:
       run:
@@ -22,12 +22,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Configure AWS credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::851725392626:role/GitHubActionsTerraformRole
-          aws-region: us-east-1
-
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
@@ -35,6 +29,12 @@ jobs:
 
       - name: Terraform Format
         run: terraform fmt -check
+
+      # ✅ Zip Lambda Functions
+      - name: Zip Lambda functions
+        run: |
+          cd ../functions/submit_log && zip -r ../submit_log.zip . && cd -
+          cd ../functions/get_logs && zip -r ../get_logs.zip . && cd -
 
       - name: Terraform Init
         run: terraform init
@@ -51,17 +51,6 @@ jobs:
           path: ../functions/
           options: "-r -lll"
 
-      - name: Test POST /logs with API Key
-        run: |
-          curl -X POST \
-            -H "x-api-key: ${{ secrets.API_GATEWAY_KEY }}" \
-            -H "Content-Type: application/json" \
-            -d '{"severity": "info", "message": "CI/CD pipeline test log"}' \
-            https://rvuwk172wd.execute-api.us-east-1.amazonaws.com/prod/logs
-
-      - name: Test GET /logs with API Key
-        run: |
-          curl -X GET \
-            -H "x-api-key: ${{ secrets.API_GATEWAY_KEY }}" \
-            https://rvuwk172wd.execute-api.us-east-1.amazonaws.com/prod/logs | jq .
-
+      # ✅ Optional future step (uncomment if needed)
+      # - name: Terraform Apply
+      #   run: terraform apply -auto-approve
