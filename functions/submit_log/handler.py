@@ -1,25 +1,34 @@
-# This function receives a log entry via HTTP POST, validates it, and writes it to DynamoDB.
-
 import json
+import os
 import uuid
-import boto3
 from datetime import datetime
+import boto3
 
 dynamodb = boto3.resource('dynamodb')
-table = dynamodb.Table('LogEntries')  # match your var.log_table_name
+table = dynamodb.Table(os.environ['LOG_TABLE'])
 
 def lambda_handler(event, context):
     try:
-        body = json.loads(event.get('body', '{}'))
+        body = json.loads(event['body'])
+
         severity = body.get('severity')
         message = body.get('message')
 
-        if severity not in ["info", "warning", "error"]:
-            return {"statusCode": 400, "body": json.dumps({"error": "Invalid severity"})}
+        if severity not in ['info', 'warning', 'error']:
+            return {
+                "statusCode": 400,
+                "body": json.dumps({"error": "Invalid severity level. Use info, warning, or error."})
+            }
+
+        if not message:
+            return {
+                "statusCode": 400,
+                "body": json.dumps({"error": "Missing message field."})
+            }
 
         log_entry = {
             "id": str(uuid.uuid4()),
-            "timestamp": datetime.utcnow().isoformat(),
+            "datetime": datetime.utcnow().isoformat(),
             "severity": severity,
             "message": message
         }
@@ -28,7 +37,7 @@ def lambda_handler(event, context):
 
         return {
             "statusCode": 200,
-            "body": json.dumps({"message": "Log saved", "log": log_entry})
+            "body": json.dumps({"message": "Log entry saved successfully.", "log": log_entry})
         }
 
     except Exception as e:

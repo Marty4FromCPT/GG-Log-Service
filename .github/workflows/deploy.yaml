@@ -1,71 +1,45 @@
-name: Secure Terraform Pipeline with Lambda Packaging & API Test
+name: Deploy Serverless Functions Only
 
 on:
-  push:
-    branches: [main]
-  pull_request:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
-  deploy:
-    name: Terraform CI/CD with Lambda
+  update-lambdas:
+    name: Upload Lambda Code to AWS
     runs-on: ubuntu-latest
 
-    permissions:
-      id-token: write
-      contents: read
-
-    env:
-      AWS_REGION: us-east-1
-      API_ENDPOINT: "https://rvuwk172wd.execute-api.us-east-1.amazonaws.com/prod"
-      API_KEY: ${{ secrets.API_KEY }}
-
-    defaults:
-      run:
-        working-directory: terraform
-
     steps:
-      - name: ✅ Checkout Code
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: ✅ Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.11"
+    - name: Configure AWS credentials (OIDC)
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        role-to-assume: arn:aws:iam::<ACCOUNT_ID>:role/<GITHUB_OIDC_ROLE_NAME>
+        aws-region: us-east-1
 
-      - name: 📦 Zip Lambda Functions
-        run: |
-          zip -j submit_log.zip ../functions/submit_log/handler.py
-          zip -j get_logs.zip ../functions/get_logs/handler.py
+    - name: Zip submit_log Lambda
+      run: |
+        cd functions/submit_log
+        zip -r ../../submit_log.zip handler.py
 
-      - name: 🔐 Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: arn:aws:iam::851725392626:role/GitHubActionsDeployRole
-          role-session-name: GitHubActionsSession
-          aws-region: ${{ env.AWS_REGION }}
+    - name: Zip get_logs Lambda
+      run: |
+        cd functions/get_logs
+        zip -r ../../get_logs.zip handler.py
 
-      - name: ⚙️ Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.6.6
+    - name: Upload submit_log to Lambda
+      run: |
+        aws lambda update-function-code \
+          --function-name submit-log-function \
+          --zip-file fileb://submit_log.zip
 
-      - name: 🔍 Terraform Format Check
-        run: terraform fmt -check
-
-      - name: 🔧 Terraform Init
-        run: terraform init
-
-      - name: ✅ Terraform Validate
-        run: terraform validate
-
-      - name: 🛡️ Terraform Security Scan
-        uses: aquasecurity/tfsec-action@v1.0.3
-
-      - name: 🔐 Python Security Scan
-        uses: tj-actions/bandit@v2
-        with:
-          path: ../functions/
-          options: "-r -lll"
-
-      - name: 🚀 Terraform Apply
-        run: terraform apply -auto-approve
+    - name: Upload get_logs to Lambda
+      run: |
+        aws lambda update-function-code \
+          --function-name get-logs-function \
+          --zip-file fileb://get_logs.zip

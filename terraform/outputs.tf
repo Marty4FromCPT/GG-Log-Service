@@ -1,6 +1,7 @@
-# Outputs will be defined here
+output "submit_log_url" {
+  value = aws_api_gateway_deployment.logs_api_deployment.invoke_url
+}
 
-output "api_endpoint" {
-  description = "Base URL of the API Gateway"
-  value       = "https://${aws_api_gateway_rest_api.log_api.id}.execute-api.${var.aws_region}.amazonaws.com/${aws_api_gateway_stage.log_stage.stage_name}"
+output "log_table_name" {
+  value = var.log_table_name
 }

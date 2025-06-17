@@ -1,31 +1,31 @@
 resource "aws_lambda_function" "submit_log" {
-  function_name    = "submit_log"
-  role             = aws_iam_role.lambda_exec_role.arn
-  handler          = "handler.lambda_handler"
-  runtime          = "python3.11"
-  timeout          = 10
-  filename         = "${path.module}/submit_log.zip"
-  source_code_hash = filebase64sha256("${path.module}/submit_log.zip")
+  function_name = var.submit_log_function_name
+  filename      = "../functions/submit_log.zip"
+  handler       = "handler.lambda_handler"
+  runtime       = var.lambda_runtime
+  role          = aws_iam_role.lambda_exec.arn
+  source_code_hash = filebase64sha256("../functions/submit_log.zip")
+  timeout       = 10
 
   environment {
     variables = {
-      DYNAMODB_TABLE = aws_dynamodb_table.log_entries.name
+      LOG_TABLE = var.log_table_name
     }
   }
 }
 
 resource "aws_lambda_function" "get_logs" {
-  function_name    = "get_logs"
-  role             = aws_iam_role.lambda_exec_role.arn
-  handler          = "handler.lambda_handler"
-  runtime          = "python3.11"
-  timeout          = 10
-  filename         = "${path.module}/get_logs.zip"
-  source_code_hash = filebase64sha256("${path.module}/get_logs.zip")
+  function_name = var.get_logs_function_name
+  filename      = "../functions/get_logs.zip"
+  handler       = "handler.lambda_handler"
+  runtime       = var.lambda_runtime
+  role          = aws_iam_role.lambda_exec.arn
+  source_code_hash = filebase64sha256("../functions/get_logs.zip")
+  timeout       = 10
 
   environment {
     variables = {
-      DYNAMODB_TABLE = aws_dynamodb_table.log_entries.name
+      LOG_TABLE = var.log_table_name
     }
   }
 }
