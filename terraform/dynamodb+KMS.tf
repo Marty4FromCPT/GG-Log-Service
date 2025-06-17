@@ -16,7 +16,7 @@ resource "aws_dynamodb_table" "log_entries" {
     type = "S"
   }
 
-  
+
 
   server_side_encryption {
     enabled     = true

@@ -66,8 +66,8 @@ resource "aws_api_gateway_stage" "log_stage" {
 resource "aws_api_gateway_api_key" "log_api_key" {
   name    = "LogServiceAPIKey"
   enabled = true
-  value   = "log-service-key-123"
 }
+
 
 # === Usage Plan ===
 resource "aws_api_gateway_usage_plan" "log_plan" {
@@ -102,8 +102,8 @@ resource "aws_api_gateway_method_settings" "log_method_settings" {
   method_path = "*/*"
 
   settings {
-    metrics_enabled     = true
-    logging_level       = "INFO"
-    data_trace_enabled  = false
+    metrics_enabled    = true
+    logging_level      = "INFO"
+    data_trace_enabled = false
   }
 }

@@ -51,9 +51,17 @@ jobs:
           path: ../functions/
           options: "-r -lll"
 
-      # Optional: Uncomment this when ready to deploy automatically
-      # - name: Terraform Plan
-      #   run: terraform plan
+      - name: Test POST /logs with API Key
+        run: |
+          curl -X POST \
+            -H "x-api-key: ${{ secrets.API_GATEWAY_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{"severity": "info", "message": "CI/CD pipeline test log"}' \
+            https://rvuwk172wd.execute-api.us-east-1.amazonaws.com/prod/logs
 
-      # - name: Terraform Apply
-      #   run: terraform apply -auto-approve
+      - name: Test GET /logs with API Key
+        run: |
+          curl -X GET \
+            -H "x-api-key: ${{ secrets.API_GATEWAY_KEY }}" \
+            https://rvuwk172wd.execute-api.us-east-1.amazonaws.com/prod/logs | jq .
+

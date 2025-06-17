@@ -83,8 +83,8 @@ resource "aws_iam_role_policy" "dynamodb_access" {
     Version = "2012-10-17",
     Statement = [
       {
-        Effect   = "Allow",
-        Action   = [
+        Effect = "Allow",
+        Action = [
           "dynamodb:PutItem",
           "dynamodb:Scan",
           "dynamodb:Query"
