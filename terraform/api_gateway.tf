@@ -1,70 +1,102 @@
-# REST API Integration
-
 resource "aws_api_gateway_rest_api" "log_api" {
-  name = "LogServiceAPI"
+  name        = "LogServiceAPI"
+  description = "API Gateway for submitting and retrieving log entries"
 }
 
-resource "aws_api_gateway_resource" "log_resource" {
+resource "aws_api_gateway_resource" "logs_resource" {
   rest_api_id = aws_api_gateway_rest_api.log_api.id
   parent_id   = aws_api_gateway_rest_api.log_api.root_resource_id
   path_part   = "logs"
 }
 
-# POST /logs
+# === POST /logs ===
 resource "aws_api_gateway_method" "post_logs" {
-  rest_api_id   = aws_api_gateway_rest_api.log_api.id
-  resource_id   = aws_api_gateway_resource.log_resource.id
-  http_method   = "POST"
-  authorization = "NONE"
+  rest_api_id      = aws_api_gateway_rest_api.log_api.id
+  resource_id      = aws_api_gateway_resource.logs_resource.id
+  http_method      = "POST"
+  authorization    = "NONE"
+  api_key_required = true
 }
 
-resource "aws_api_gateway_integration" "post_logs_lambda" {
+resource "aws_api_gateway_integration" "post_logs_integration" {
   rest_api_id             = aws_api_gateway_rest_api.log_api.id
-  resource_id             = aws_api_gateway_resource.log_resource.id
+  resource_id             = aws_api_gateway_resource.logs_resource.id
   http_method             = aws_api_gateway_method.post_logs.http_method
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = aws_lambda_function.submit_log.invoke_arn
 }
 
-# GET /logs
+# === GET /logs ===
 resource "aws_api_gateway_method" "get_logs" {
-  rest_api_id   = aws_api_gateway_rest_api.log_api.id
-  resource_id   = aws_api_gateway_resource.log_resource.id
-  http_method   = "GET"
-  authorization = "NONE"
+  rest_api_id      = aws_api_gateway_rest_api.log_api.id
+  resource_id      = aws_api_gateway_resource.logs_resource.id
+  http_method      = "GET"
+  authorization    = "NONE"
+  api_key_required = true
 }
 
-resource "aws_api_gateway_integration" "get_logs_lambda" {
+resource "aws_api_gateway_integration" "get_logs_integration" {
   rest_api_id             = aws_api_gateway_rest_api.log_api.id
-  resource_id             = aws_api_gateway_resource.log_resource.id
+  resource_id             = aws_api_gateway_resource.logs_resource.id
   http_method             = aws_api_gateway_method.get_logs.http_method
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = aws_lambda_function.get_logs.invoke_arn
 }
 
-resource "aws_lambda_permission" "allow_post" {
-  statement_id  = "AllowExecutionFromAPIGatewayPost"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.submit_log.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_api_gateway_rest_api.log_api.execution_arn}/*/*"
-}
-
-resource "aws_lambda_permission" "allow_get" {
-  statement_id  = "AllowExecutionFromAPIGatewayGet"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.get_logs.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_api_gateway_rest_api.log_api.execution_arn}/*/*"
-}
-
+# === Deployment ===
 resource "aws_api_gateway_deployment" "log_api" {
-  depends_on = [
-    aws_api_gateway_integration.post_logs_lambda,
-    aws_api_gateway_integration.get_logs_lambda
-  ]
   rest_api_id = aws_api_gateway_rest_api.log_api.id
-  stage_name  = "prod"
+
+  depends_on = [
+    aws_api_gateway_integration.post_logs_integration,
+    aws_api_gateway_integration.get_logs_integration
+  ]
+}
+
+# === API Key ===
+resource "aws_api_gateway_api_key" "log_api_key" {
+  name    = "LogServiceAPIKey"
+  enabled = true
+  value   = "log-service-key-123" # You can let AWS generate it by omitting 'value'
+}
+
+# === Usage Plan (fixed syntax) ===
+resource "aws_api_gateway_usage_plan" "log_plan" {
+  name = "LogServiceUsagePlan"
+
+  api_stages {
+    api_id = aws_api_gateway_rest_api.log_api.id
+    stage  = aws_api_gateway_deployment.log_api.stage_name
+  }
+
+  throttle_settings {
+    rate_limit  = 10
+    burst_limit = 5
+  }
+
+  quota_settings {
+    limit  = 10000
+    period = "MONTH"
+  }
+}
+
+resource "aws_api_gateway_usage_plan_key" "log_plan_key" {
+  key_id        = aws_api_gateway_api_key.log_api_key.id
+  key_type      = "API_KEY"
+  usage_plan_id = aws_api_gateway_usage_plan.log_plan.id
+}
+
+# === Method Settings for CloudWatch Logging ===
+resource "aws_api_gateway_method_settings" "log_method_settings" {
+  rest_api_id = aws_api_gateway_rest_api.log_api.id
+  stage_name  = aws_api_gateway_deployment.log_api.stage_name
+  method_path = "*/*"
+
+  settings {
+    metrics_enabled     = true
+    logging_level       = "INFO"
+    data_trace_enabled  = false
+  }
 }

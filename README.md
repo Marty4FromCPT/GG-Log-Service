@@ -1,3 +1,14 @@
+# GG Log Service
+
+![Terraform CI](https://github.com/Marty4FromCPT/GG-Log-Service/actions/workflows/deploy.yml/badge.svg)
+
+
+
+
+
+
+
+
 Project Folder Structure
 
 GG-LOG-SERVICE/

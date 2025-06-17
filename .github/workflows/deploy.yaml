@@ -11,8 +11,8 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      id-token: write
-      contents: read
+      id-token: write     # Needed for OIDC to assume the role
+      contents: read      # Needed to checkout code
 
     defaults:
       run:
@@ -21,6 +21,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::851725392626:role/GitHubActionsTerraformRole
+          aws-region: us-east-1
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -44,3 +50,10 @@ jobs:
         with:
           path: ../functions/
           options: "-r -lll"
+
+      # Optional: Uncomment this when ready to deploy automatically
+      # - name: Terraform Plan
+      #   run: terraform plan
+
+      # - name: Terraform Apply
+      #   run: terraform apply -auto-approve
