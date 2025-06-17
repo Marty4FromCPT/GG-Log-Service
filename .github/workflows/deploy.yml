@@ -1,3 +1,11 @@
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'functions/**'
+
 name: Deploy Serverless Functions Only
 
 on:
