@@ -53,12 +53,13 @@ resource "aws_iam_role" "github_oidc_lambda_deploy" {
       Action = "sts:AssumeRoleWithWebIdentity",
       Condition = {
         StringLike = {
-          "token.actions.githubusercontent.com:sub" : "repo:YOUR_GITHUB_USERNAME/YOUR_REPO_NAME:*"
+          "token.actions.githubusercontent.com:sub": "repo:Marty4FromCPT/GG-Log-Service:*"
         }
       }
     }]
   })
 }
+
 
 resource "aws_iam_policy" "github_lambda_deploy_policy" {
   name = "GitHubLambdaDeployPolicy"
