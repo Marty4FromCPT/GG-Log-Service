@@ -100,3 +100,9 @@ resource "aws_api_gateway_method_settings" "log_method_settings" {
     data_trace_enabled  = false
   }
 }
+
+resource "aws_api_gateway_stage" "log_stage" {
+  rest_api_id   = aws_api_gateway_rest_api.log_api.id
+  deployment_id = aws_api_gateway_deployment.log_api.id
+  stage_name    = "prod"
+}
