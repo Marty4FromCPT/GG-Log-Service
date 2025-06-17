@@ -1,4 +1,4 @@
-name: Secure Terraform Pipeline
+name: Secure Terraform Pipeline with Lambda Packaging & API Test
 
 on:
   push:
@@ -7,51 +7,65 @@ on:
 
 jobs:
   deploy:
-    name: Terraform Secure CI/CD
+    name: Terraform CI/CD with Lambda
     runs-on: ubuntu-latest
 
     permissions:
       id-token: write
       contents: read
 
+    env:
+      AWS_REGION: us-east-1
+      API_ENDPOINT: "https://rvuwk172wd.execute-api.us-east-1.amazonaws.com/prod"
+      API_KEY: ${{ secrets.API_KEY }}
+
     defaults:
       run:
         working-directory: terraform
 
     steps:
-      - name: Checkout code
+      - name: ✅ Checkout Code
         uses: actions/checkout@v3
 
-      - name: Setup Terraform
+      - name: ✅ Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: 📦 Zip Lambda Functions
+        run: |
+          zip -j submit_log.zip ../functions/submit_log/handler.py
+          zip -j get_logs.zip ../functions/get_logs/handler.py
+
+      - name: 🔐 Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::851725392626:role/GitHubActionsDeployRole
+          role-session-name: GitHubActionsSession
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: ⚙️ Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.6.6
 
-      - name: Terraform Format
+      - name: 🔍 Terraform Format Check
         run: terraform fmt -check
 
-      # ✅ Zip Lambda Functions
-      - name: Zip Lambda functions
-        run: |
-            zip -j terraform/submit_log.zip functions/submit_log/handler.py
-            zip -j terraform/get_logs.zip functions/get_logs/handler.py
-
-
-      - name: Terraform Init
+      - name: 🔧 Terraform Init
         run: terraform init
 
-      - name: Terraform Validate
+      - name: ✅ Terraform Validate
         run: terraform validate
 
-      - name: Terraform Security Scan (tfsec)
+      - name: 🛡️ Terraform Security Scan
         uses: aquasecurity/tfsec-action@v1.0.3
 
-      - name: Python Security Scan (bandit)
+      - name: 🔐 Python Security Scan
         uses: tj-actions/bandit@v2
         with:
           path: ../functions/
           options: "-r -lll"
 
-      # ✅ Optional future step (uncomment if needed)
-      # - name: Terraform Apply
-      #   run: terraform apply -auto-approve
+      - name: 🚀 Terraform Apply
+        run: terraform apply -auto-approve
