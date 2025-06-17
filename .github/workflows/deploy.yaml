@@ -30,11 +30,11 @@ jobs:
       - name: Terraform Format
         run: terraform fmt -check
 
-      # ✅ Zip Lambda Functions
+      # ✅ Zip Lambda Functions into terraform directory
       - name: Zip Lambda functions
         run: |
-          cd ../functions/submit_log && zip -r ../submit_log.zip . && cd -
-          cd ../functions/get_logs && zip -r ../get_logs.zip . && cd -
+          zip -r terraform/submit_log.zip functions/submit_log/*
+          zip -r terraform/get_logs.zip functions/get_logs/*
 
       - name: Terraform Init
         run: terraform init
@@ -51,6 +51,6 @@ jobs:
           path: ../functions/
           options: "-r -lll"
 
-      # ✅ Optional future step (uncomment if needed)
+      # Optional Terraform Apply (manual approval recommended)
       # - name: Terraform Apply
       #   run: terraform apply -auto-approve
