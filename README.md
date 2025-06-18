@@ -44,8 +44,8 @@ Default region: us-east-1
 
 All infrastructure is defined in a single terraform/main.tf file.
 
-cd terraform
-terraform init
+cd terraform/
+terraform init/
 terraform apply
 
 Outputs:
