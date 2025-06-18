@@ -75,6 +75,7 @@ cd ../..
 
 🔹 Submit a Log Entry with below command.
 
+# Replace <api-url> with your actual API Gateway URL
 curl -X POST https://<api-id>.execute-api.us-east-1.amazonaws.com/prod/submit \
   -H "Content-Type: application/json" \
   -d '{
@@ -83,7 +84,7 @@ curl -X POST https://<api-id>.execute-api.us-east-1.amazonaws.com/prod/submit \
 }'
 
 🔹 Get the 100 Most Recent Logs with below command.
-
+# Replace <api-url> with your actual API Gateway URL
 curl https://<api-id>.execute-api.us-east-1.amazonaws.com/prod/logs
 
 
