@@ -57,6 +57,18 @@ You’ll receive two API Gateway URLs:
 
 
 
+🔷 STEP 3b: Lambda Zip Files Already Included
+
+pre-zipped files (submit_log.zip and get_logs.zip) are already included in the functions/ directory for your convenience.
+
+If need to update the code and need to repackage see below.
+
+cd functions/submit_log
+zip -r ../submit_log.zip handler.py
+
+cd ../get_logs
+zip -r ../get_logs.zip handler.py
+cd ../..
 
 
 🔷 STEP 4: Test the API with curl

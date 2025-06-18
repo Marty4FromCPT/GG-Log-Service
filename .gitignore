@@ -1,5 +1,4 @@
 # .gitignore
-*.zip
 .terraform/
 terraform.tfstate*
 *.tfplan
