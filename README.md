@@ -56,78 +56,23 @@ You’ll receive two API Gateway URLs:
 - get_logs_url    (to GET the latest 100 logs)
 
 
+Lambda Zip Files Already Included 
 
-🔷 STEP 3b: Lambda Zip Files Already Included
+pre-zipped files (submit_log.zip and get_logs.zip) are already included in the functions/ directory.
 
-pre-zipped files (submit_log.zip and get_logs.zip) are already included in the functions/ directory for your convenience.
-
-If need to update the code and need to repackage see below.
-
-cd functions/submit_log
-zip -r ../submit_log.zip handler.py
-
-cd ../get_logs
-zip -r ../get_logs.zip handler.py
-cd ../..
 
 
 🔷 STEP 4: Test the API with curl
 
-🔹 Submit a Log Entry with below command.
+🔹 Submit log entries with provided submit_logs.sh script in functions/ directory   (# Replace <api-url> with your actual API Gateway URL in script)
 
+   run - bash submit_logs.sh
+
+   Once exectuted run below command for log retrieval.
+
+🔹 Gets the lates 100 Log entries (most recent to first ) with below command.
 # Replace <api-url> with your actual API Gateway URL
-curl -X POST https://<api-id>.execute-api.us-east-1.amazonaws.com/prod/submit \
-  -H "Content-Type: application/json" \
-  -d '{
-    "severity": "info",
-    "message": "Test log from curl"
-}'
-
-🔹 Get the 100 Most Recent Logs with below command.
-# Replace <api-url> with your actual API Gateway URL
-curl https://<api-id>.execute-api.us-east-1.amazonaws.com/prod/logs
-
-
-
-
-
-🔷 STEP 5: Submit Many Logs for Testing
-
-To simulate load and test sorting/filtering, run:
-
-#!/bin/bash
-for i in {1..200}
-  do
-    curl -s -X POST https://<api-id>.execute-api.us-east-1.amazonaws.com/prod/submit \
-      -H "Content-Type: application/json" \
-      -d "{\"severity\": \"info\", \"message\": \"Test log entry number $i\"}" > /dev/null
-    echo "Submitted log #$i"
-done
-
-
-
-
-
-🔷 STEP 6: Advanced Testing
-
-
-🔸 Pretty Print JSON Output
-
 curl -s https://<api-id>.execute-api.us-east-1.amazonaws.com/prod/logs | jq .
-
-
-🔸 Clean One-Line Output
-
-curl -s https://<api-id>.execute-api.us-east-1.amazonaws.com/prod/logs \
-  | jq -r '.[] | "\(.datetime) [\(.severity)] - \(.message)"'
-
-
-🔸 Filter by Severity
-
-curl -s https://<api-id>.execute-api.us-east-1.amazonaws.com/prod/logs \
-  | jq -r '.[] | select(.severity == "error") | "\(.datetime) [\(.severity)] - \(.message)"'
-
-
 
 
 
