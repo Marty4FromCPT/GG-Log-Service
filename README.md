@@ -2,46 +2,39 @@
 
 A serverless, infrastructure-as-code driven log service application using AWS Lambda, DynamoDB, API Gateway, and Terraform. This solution enables log ingestion and retrieval via secure RESTful API endpoints.
 
-🚀 Features
+Features
 
 Two AWS Lambda functions:
 
 submit-log-function: Accepts and stores logs
-
 get-logs-function: Retrieves the 100 most recent logs
-
 DynamoDB with encryption enabled
-
 Least privilege IAM roles
-
 Fully IAC-managed using Terraform
-
 GitHub Actions pipeline to update Lambda code (optional)
 
 
-🧱 Step 1: Clone This Repository
+🔷 STEP 1: Clone This Repository
 
 git clone https://github.com/Marty4FromCPT/GG-Log-Service.git
 cd GG-Log-Service
 
-☁️ Step 2: AWS Setup
 
-✅ Configure AWS CLI
+🔷 STEP 2: AWS Setup
+
+Configure AWS CLI
 
 If you haven’t already, configure your AWS credentials:
 
-aws configure
+cmd - aws configure
 
 Provide:
-
 AWS Access Key ID
-
 AWS Secret Access Key
-
 Default region: us-east-1
 
 
-📦 Step 3: Deploy Infrastructure Using Terraform
+🔷 STEP 3: Deploy Infrastructure Using Terraform
 
 All infrastructure is defined in a single terraform/main.tf file.
 
@@ -49,17 +42,17 @@ cd terraform
 terraform init
 terraform apply
 
-📤 Outputs:
+Outputs:
 
 You’ll receive two API Gateway URLs:
-
 submit_log_url — to POST logs
-
 get_logs_url — to GET the latest 100 logs
 
-📝 Step 4: Test the API with curl
 
-🔹 Submit a Log Entry
+
+🔷 STEP 4: Test the API with curl
+
+🔹 Submit a Log Entry with below command.
 
 curl -X POST https://<api-id>.execute-api.us-east-1.amazonaws.com/prod/submit \
   -H "Content-Type: application/json" \
@@ -68,11 +61,13 @@ curl -X POST https://<api-id>.execute-api.us-east-1.amazonaws.com/prod/submit \
     "message": "Test log from curl"
 }'
 
-🔹 Get the 100 Most Recent Logs
+🔹 Get the 100 Most Recent Logs with below command.
 
 curl https://<api-id>.execute-api.us-east-1.amazonaws.com/prod/logs
 
-🔄 Step 5: Submit Many Logs for Testing
+
+
+🔷 STEP 5: Submit Many Logs for Testing
 
 To simulate load and test sorting/filtering, run:
 
@@ -86,29 +81,32 @@ for i in {1..200}
 done
 
 
-🧪 Advanced Testing Tips
+
+🔷 STEP 6: Advanced Testing.
+
 
 🔸 Pretty Print JSON Output
 
 curl -s https://<api-id>.execute-api.us-east-1.amazonaws.com/prod/logs | jq .
+
 
 🔸 Clean One-Line Output
 
 curl -s https://<api-id>.execute-api.us-east-1.amazonaws.com/prod/logs \
   | jq -r '.[] | "\(.datetime) [\(.severity)] - \(.message)"'
 
+
 🔸 Filter by Severity
 
-  curl -s https://<api-id>.execute-api.us-east-1.amazonaws.com/prod/logs \
+curl -s https://<api-id>.execute-api.us-east-1.amazonaws.com/prod/logs \
   | jq -r '.[] | select(.severity == "error") | "\(.datetime) [\(.severity)] - \(.message)"'
 
 
-  🔐 Security & Best Practices
+
+
+🔐 Security & Best Practices
 
 DynamoDB is encrypted using AWS-managed KMS
-
 Lambda roles follow least privilege
-
 IAM permissions scoped tightly to required actions
-
 No credentials exposed in repo
