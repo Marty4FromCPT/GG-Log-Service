@@ -108,7 +108,7 @@ done
 
 
 
-🔷 STEP 6: Advanced Testing.
+🔷 STEP 6: Advanced Testing
 
 
 🔸 Pretty Print JSON Output
