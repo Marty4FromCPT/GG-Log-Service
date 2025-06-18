@@ -1,144 +1,114 @@
-# 📝 GG-Log-Service (AWS Serverless Logging API)
+📘 GG-Log-Service
 
-This project is a fully serverless, Infrastructure-as-Code (IaC) driven log service on AWS. It demonstrates secure, scalable logging using:
+A serverless, infrastructure-as-code driven log service application using AWS Lambda, DynamoDB, API Gateway, and Terraform. This solution enables log ingestion and retrieval via secure RESTful API endpoints.
 
-- AWS Lambda (Python)
-- DynamoDB
-- API Gateway
-- Terraform
+🚀 Features
 
----
+Two AWS Lambda functions:
 
-## 📌 Features
+submit-log-function: Accepts and stores logs
 
-- ✅ Submit log entries via HTTP POST
-- ✅ Retrieve the 100 most recent logs via HTTP GET
-- ✅ Logs stored with UUID, timestamp, severity level, and message
-- ✅ Fully IaC driven with a single `main.tf` file
-- ✅ No UI required — testable via curl or Postman
+get-logs-function: Retrieves the 100 most recent logs
 
----
+DynamoDB with encryption enabled
 
-## 📁 Project Structure
+Least privilege IAM roles
 
-GG-Log-Service/
-├── terraform/
-│ └── main.tf # Full infrastructure definition
-├── functions/
-│ ├── submit_log/
-│ │ └── handler.py # Lambda: store log entry
-│ └── get_logs/
-│ └── handler.py # Lambda: retrieve logs
-├── submit_log.zip # Zipped Lambda package
-├── get_logs.zip # Zipped Lambda package
-├── GG-Log-Service.postman_collection.json
-├── GG-Log-Service.postman_environment.json
-└── README.md
+Fully IAC-managed using Terraform
+
+GitHub Actions pipeline to update Lambda code (optional)
 
 
----
+🧱 Step 1: Clone This Repository
 
-## 🚀 Deployment Steps
+git clone https://github.com/Marty4FromCPT/GG-Log-Service.git
+cd GG-Log-Service
 
-### 1. Prerequisites
+☁️ Step 2: AWS Setup
 
-- AWS CLI installed and configured
-- Terraform installed
-- AWS IAM permissions to deploy Lambda, API Gateway, DynamoDB
+✅ Configure AWS CLI
 
----
+If you haven’t already, configure your AWS credentials:
 
-### 2. Package Lambda Functions
+aws configure
 
-From project root:
+Provide:
 
-```bash
-cd functions/submit_log
-zip -r ../../submit_log.zip handler.py
+AWS Access Key ID
 
-cd ../get_logs
-zip -r ../../get_logs.zip handler.py
+AWS Secret Access Key
+
+Default region: us-east-1
+
+
+📦 Step 3: Deploy Infrastructure Using Terraform
+
+All infrastructure is defined in a single terraform/main.tf file.
 
 cd terraform
 terraform init
 terraform apply
 
- This creates:
+📤 Outputs:
 
-DynamoDB table
+You’ll receive two API Gateway URLs:
 
-IAM role + policies
+submit_log_url — to POST logs
 
-Two Lambda functions
+get_logs_url — to GET the latest 100 logs
 
-API Gateway with /submit and /logs endpoints
+📝 Step 4: Test the API with curl
 
-Note: Terraform outputs the URLs for testing.
+🔹 Submit a Log Entry
 
-PI Endpoints
-Assume https://abc123.execute-api.us-east-1.amazonaws.com/prod is your base URL.
-
-🔹 1. Submit a Log Entry
-Endpoint: POST /submit
-Headers: Content-Type: application/json
-
-{
-  "severity": "warning",
-  "message": "CPU usage is high"
-}
-
-curl -X POST https://<your-url>/submit \
+curl -X POST https://<api-id>.execute-api.us-east-1.amazonaws.com/prod/submit \
   -H "Content-Type: application/json" \
-  -d '{"severity": "info", "message": "Hello from curl"}'
-
- Get the 100 Most Recent Logs
-Endpoint: GET /logs
-
-curl https://<your-url>/logs
-
-Response:
-
-[
-  {
-    "id": "uuid",
-    "datetime": "2025-06-17T17:10:00Z",
+  -d '{
     "severity": "info",
-    "message": "Hello from curl"
-  }
-]
+    "message": "Test log from curl"
+}'
 
-🧪 Testing with Postman
-Use the provided files:
+🔹 Get the 100 Most Recent Logs
 
-GG-Log-Service.postman_collection.json
+curl https://<api-id>.execute-api.us-east-1.amazonaws.com/prod/logs
 
-GG-Log-Service.postman_environment.json
+🔄 Step 5: Submit Many Logs for Testing
 
-Steps:
+To simulate load and test sorting/filtering, run:
 
-Import both files into Postman
+#!/bin/bash
+for i in {1..200}
+  do
+    curl -s -X POST https://<api-id>.execute-api.us-east-1.amazonaws.com/prod/submit \
+      -H "Content-Type: application/json" \
+      -d "{\"severity\": \"info\", \"message\": \"Test log entry number $i\"}" > /dev/null
+    echo "Submitted log #$i"
+done
 
-Update the base_url in environment to your deployed API URL
 
-Use the Submit Log and Get Logs requests to test
+🧪 Advanced Testing Tips
 
-🛡️ Security & Best Practices
-✅ Least privilege IAM roles
+🔸 Pretty Print JSON Output
 
-✅ Encrypted DynamoDB storage
+curl -s https://<api-id>.execute-api.us-east-1.amazonaws.com/prod/logs | jq .
 
-✅ No hardcoded secrets
+🔸 Clean One-Line Output
 
-✅ Serverless, event-driven architecture
+curl -s https://<api-id>.execute-api.us-east-1.amazonaws.com/prod/logs \
+  | jq -r '.[] | "\(.datetime) [\(.severity)] - \(.message)"'
 
-📘 Notes
-Written in Python 3.11 for AWS Lambda
+🔸 Filter by Severity
 
-Logs are sorted by datetime descending
+  curl -s https://<api-id>.execute-api.us-east-1.amazonaws.com/prod/logs \
+  | jq -r '.[] | select(.severity == "error") | "\(.datetime) [\(.severity)] - \(.message)"'
 
-Fully IaC for repeatable deployment
 
-👤 Author
-Martin Botha
-Cloud Engineer | DevOps Enthusiast
-GitHub: Marty4FromCPT
+  🔐 Security & Best Practices
+
+DynamoDB is encrypted using AWS-managed KMS
+
+Lambda roles follow least privilege
+
+IAM permissions scoped tightly to required actions
+
+No credentials exposed in repo
