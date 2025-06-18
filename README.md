@@ -14,10 +14,14 @@ Fully IAC-managed using Terraform
 GitHub Actions pipeline to update Lambda code (optional)
 
 
+
+
 🔷 STEP 1: Clone This Repository
 
 git clone https://github.com/Marty4FromCPT/GG-Log-Service.git
 cd GG-Log-Service
+
+
 
 
 🔷 STEP 2: AWS Setup
@@ -34,6 +38,8 @@ AWS Secret Access Key
 Default region: us-east-1
 
 
+
+
 🔷 STEP 3: Deploy Infrastructure Using Terraform
 
 All infrastructure is defined in a single terraform/main.tf file.
@@ -45,8 +51,11 @@ terraform apply
 Outputs:
 
 You’ll receive two API Gateway URLs:
-submit_log_url — to POST logs
-get_logs_url — to GET the latest 100 logs
+
+- submit_log_url  (to POST logs)
+- get_logs_url    (to GET the latest 100 logs)
+
+
 
 
 
@@ -67,6 +76,8 @@ curl https://<api-id>.execute-api.us-east-1.amazonaws.com/prod/logs
 
 
 
+
+
 🔷 STEP 5: Submit Many Logs for Testing
 
 To simulate load and test sorting/filtering, run:
@@ -79,6 +90,8 @@ for i in {1..200}
       -d "{\"severity\": \"info\", \"message\": \"Test log entry number $i\"}" > /dev/null
     echo "Submitted log #$i"
 done
+
+
 
 
 
@@ -104,9 +117,16 @@ curl -s https://<api-id>.execute-api.us-east-1.amazonaws.com/prod/logs \
 
 
 
+
+
 🔐 Security & Best Practices
 
 DynamoDB is encrypted using AWS-managed KMS
 Lambda roles follow least privilege
 IAM permissions scoped tightly to required actions
 No credentials exposed in repo
+
+
+
+
+Built and tested by Martin Botha · Powered by AWS + Terraform ☁️
