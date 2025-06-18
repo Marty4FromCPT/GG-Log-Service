@@ -1,26 +1,41 @@
 import json
-import os
 import boto3
+import uuid
+from datetime import datetime
+import os
 
 dynamodb = boto3.resource('dynamodb')
-table_name = os.environ.get('LOG_TABLE')
-table = dynamodb.Table(table_name)
+table = dynamodb.Table(os.environ['LOG_TABLE'])
 
 def lambda_handler(event, context):
     try:
-        response = table.scan()
-        items = response.get("Items", [])
+        body = json.loads(event['body'])
 
-        # Sort logs by datetime descending and limit to 100
-        sorted_logs = sorted(items, key=lambda x: x['datetime'], reverse=True)[:100]
+        log_entry = {
+            'id': str(uuid.uuid4()),
+            'datetime': datetime.utcnow().isoformat(),
+            'severity': body.get('severity', 'info'),
+            'message': body.get('message', '')
+        }
+
+        table.put_item(Item=log_entry)
 
         return {
-            "statusCode": 200,
-            "body": json.dumps(sorted_logs)
+            'statusCode': 200,
+            'body': json.dumps({
+                'message': 'Log entry saved successfully.',
+                'log': log_entry
+            }),
+            'headers': {
+                'Content-Type': 'application/json'
+            }
         }
 
     except Exception as e:
         return {
-            "statusCode": 500,
-            "body": json.dumps({"error": str(e)})
+            'statusCode': 500,
+            'body': json.dumps({'error': str(e)}),
+            'headers': {
+                'Content-Type': 'application/json'
+            }
         }
