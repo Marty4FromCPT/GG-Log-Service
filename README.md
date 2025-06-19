@@ -1,6 +1,29 @@
-📘 GG-Log-Service
+Project Summary – GG Log Service
+I developed a fully serverless, infrastructure-as-code (IaC) log service using AWS Lambda, API Gateway, DynamoDB, and Terraform. The solution includes:
 
-A serverless, infrastructure-as-code driven log service application using AWS Lambda, DynamoDB, API Gateway, and Terraform. This solution enables log ingestion and retrieval via secure RESTful API endpoints.
+Two Lambda functions:
+
+One to receive and store log entries
+
+One to retrieve the latest 100 logs, sorted by timestamp
+
+API Gateway endpoints to interact with the service
+
+DynamoDB as the storage layer, with AWS-managed KMS encryption
+
+Least privilege IAM roles for secure execution
+
+All infrastructure is provisioned via Terraform in a single file
+
+A clean README with testing instructions and curl/Postman examples
+
+A test script (submit_logs.sh) to simulate log traffic
+
+Optionally includes a GitHub Actions pipeline to update Lambda code
+
+The entire setup is repeatable, secure, and easy to deploy, with no manual steps after cloning the repository and configuring AWS credentials.
+
+
 
 Features
 
@@ -65,26 +88,39 @@ pre-zipped files (submit_log.zip and get_logs.zip) are already included in the f
 🔷 STEP 4: Test the API with curl
 
 🔹 Submit log entries with provided submit_logs.sh script in functions/ directory   (# Replace <api-url> with your actual API Gateway URL in script)
+   
+🔹 Use below commands to create 200 log entries. (Wait to completed and move to next step for message retreival status)
+   RUN
+   chmod +x submit_logs.sh
+   ./submit_logs.sh
 
-   run - bash submit_logs.sh
 
-   Once exectuted run below command for log retrieval.
-
-🔹 Gets the lates 100 Log entries (most recent to first ) with below command.
+🔹 Below command gets the lates 100 Log entries (most recent to first )
+RUN
 # Replace <api-url> with your actual API Gateway URL
 curl -s https://<api-id>.execute-api.us-east-1.amazonaws.com/prod/logs | jq .
 
 
 
 
-🔐 Security & Best Practices
+Security & Best Practices
 
 DynamoDB is encrypted using AWS-managed KMS
 Lambda roles follow least privilege
 IAM permissions scoped tightly to required actions
 No credentials exposed in repo
 
-
+General Requirements
+Requirement	✅ Status
+Language of your choice	✔️ Python
+Well-documented code	✔️ Clear handlers + README
+GitHub repo	✔️ ✅ Repo is live and up to date
+Pipeline to deploy Lambda code	✔️ GitHub Actions configured (OIDC role assumed)
+Least privilege IAM	✔️ Role allows only necessary actions
+Data encryption	✔️ DynamoDB uses AWS-managed KMS
+No exposed credentials	✔️ AWS CLI with aws configure or GitHub OIDC
+Secure pipeline authentication	✔️ GitHub OIDC role + configure-aws-credentials action
+API security considered	✔️ IAM + HTTP headers; could later add auth if required
 
 
 Built and tested by Martin Botha · Powered by AWS + Terraform ☁️
