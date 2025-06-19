@@ -1,26 +1,17 @@
 Project Summary – GG Log Service
+
 I developed a fully serverless, infrastructure-as-code (IaC) log service using AWS Lambda, API Gateway, DynamoDB, and Terraform. The solution includes:
 
 Two Lambda functions:
-
 One to receive and store log entries
-
 One to retrieve the latest 100 logs, sorted by timestamp
-
 API Gateway endpoints to interact with the service
-
 DynamoDB as the storage layer, with AWS-managed KMS encryption
-
 Least privilege IAM roles for secure execution
-
 All infrastructure is provisioned via Terraform in a single file
-
 A clean README with testing instructions and curl/Postman examples
-
 A test script (submit_logs.sh) to simulate log traffic
-
 Optionally includes a GitHub Actions pipeline to update Lambda code
-
 The entire setup is repeatable, secure, and easy to deploy, with no manual steps after cloning the repository and configuring AWS credentials.
 
 
@@ -111,16 +102,16 @@ IAM permissions scoped tightly to required actions
 No credentials exposed in repo
 
 General Requirements
-Requirement	✅ Status
-Language of your choice	✔️ Python
-Well-documented code	✔️ Clear handlers + README
-GitHub repo	✔️ ✅ Repo is live and up to date
-Pipeline to deploy Lambda code	✔️ GitHub Actions configured (OIDC role assumed)
-Least privilege IAM	✔️ Role allows only necessary actions
-Data encryption	✔️ DynamoDB uses AWS-managed KMS
-No exposed credentials	✔️ AWS CLI with aws configure or GitHub OIDC
-Secure pipeline authentication	✔️ GitHub OIDC role + configure-aws-credentials action
-API security considered	✔️ IAM + HTTP headers; could later add auth if required
+Requirement	 Status
+Language of your choice	- Python
+Well-documented code	- Clear handlers + README
+GitHub repo	- Repo is live and up to date
+Pipeline to deploy Lambda code - GitHub Actions configured (OIDC role assumed)
+Least privilege IAM	- Role allows only necessary actions
+Data encryption - DynamoDB uses AWS-managed KMS
+No exposed credentials	- AWS CLI with aws configure or GitHub OIDC
+Secure pipeline authentication - GitHub OIDC role + configure-aws-credentials action
+API security considered	- IAM + HTTP headers; could later add auth if required
 
 
 Built and tested by Martin Botha · Powered by AWS + Terraform ☁️
