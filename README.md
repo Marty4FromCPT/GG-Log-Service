@@ -114,4 +114,4 @@ Secure pipeline authentication - GitHub OIDC role + configure-aws-credentials ac
 API security considered	- IAM + HTTP headers; could later add auth if required
 
 
-Built and tested by Martin Botha · Powered by AWS + Terraform ☁️
+Built and tested by Martin Botha · Create with AWS + Terraform 
